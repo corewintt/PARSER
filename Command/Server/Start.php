@@ -1,13 +1,16 @@
-<?php 
-/**
- * 
- */
-class Command_Server_Start extends Command {
-	
-	function execute($arg = null) {
+<?php
 
-		$d = new Daemon_Service_Server;
-		$d->startDaemon();
-		
-	}
+/**
+ *
+ */
+class Command_Server_Start extends Command
+{
+
+    function execute($arg = NULL)
+    {
+
+        $d = new Daemon_Service_Server;
+        $d->startDaemon();
+
+    }
 }

@@ -1,7 +1,8 @@
 <?php
 
 
-abstract class Command {
-	
-	abstract function execute($argument) ;
+abstract class Command
+{
+
+    abstract function execute($argument);
 }

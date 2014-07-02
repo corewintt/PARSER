@@ -8,13 +8,14 @@ abstract class model
 
     //list all collums
     abstract protected $coll = array();
-	abstract protected $coll_format = array();
-	
-	private $_values = array();
-    
+    abstract protected $coll_format = array();
+
+    private $_values = array();
+
     function __construct($opt)
     {
-        if ($opt['pk']) {
+        if($opt['pk'])
+        {
             $this->findByPk($opt['pk']);
         }
 
@@ -24,24 +25,32 @@ abstract class model
     {
         $sql = 'SELECT * FROM ' . $this->tbl . ' WHERE `' . $this->pk . '`=' . $id;
         $val = db::App()->qRow($sql);
-        foreach ($val AS $key => $val) {
-            if ($this->tbl_map($key))
+        foreach($val AS $key => $val)
+        {
+            if($this->tbl_map($key))
+            {
                 $this->{$key} = $val;
+            }
         }
     }
 
     function save()
     {
         $set = $this->__bild_set();
-        if (!$set) {
-            return false;
+        if(!$set)
+        {
+            return FALSE;
         }
         $sql = 'INSERT INTO ' . $this->tbl . ' SET ' . $set;
         $id = db::App()->q($sql);
-        if ($id) {
+        if($id)
+        {
             $this->findByPk($id);
+
             return $id;
-        } else {
+        }
+        else
+        {
 
         }
     }
@@ -49,8 +58,9 @@ abstract class model
     function update()
     {
         $set = $this->__bild_set();
-        if (!$set) {
-            return false;
+        if(!$set)
+        {
+            return FALSE;
         }
         $sql = 'UPDATE ' . $this->tbl . ' SET ' . $set . ' WHERE `' . $this->pk . '`=' . $this->id;
         db::App()->q($sql);
@@ -66,8 +76,10 @@ abstract class model
     {
 
         $array = array();
-        foreach ($this->coll AS $col) {
-            if ($col != $this->pk) {
+        foreach($this->coll AS $col)
+        {
+            if($col != $this->pk)
+            {
                 $array[] = '`' . $col . '`="' . db::App()->slash($this->{$col}) . '"';
             }
         }
@@ -80,69 +92,83 @@ abstract class model
         return in_array($key, $this->coll);
     }
 
-	public function __get($name='')
-	{
-		 if ($this->tbl_map($name)){
-		 	return $this->_values[$name];
-		 }
-	}
-	public function __set($name ,$value='')
-	{
-		 if ($this->tbl_map($name)){
-		 	if(method_exists('setField_'.$name)){
-		 		$this->_values[$name] = $this->{'setField_'.$name}($value);
-		 		return $this->_values[$name];
-		 	}
-		 	return $this->_values[$name] = $value;
-		 }
-	}
-	
-	/**
-	 * Универсальный метод получения ИД из id=>val таблиц 
-	 */
-	private function _getID($table, $collum, $idcollum, $value, $strlen = 0) {
-		if (strlen($value) > $strlen) {
-			return false;
-		}
+    public function __get($name = '')
+    {
+        if($this->tbl_map($name))
+        {
+            return $this->_values[$name];
+        }
+    }
 
-		$value_orig = $value;
-		if ($strlen > 0) {
-			$value = substr($value, 0, $strlen);
+    public function __set($name, $value = '')
+    {
+        if($this->tbl_map($name))
+        {
+            if(method_exists('setField_' . $name))
+            {
+                $this->_values[$name] = $this->{'setField_' . $name}($value);
 
-		}
+                return $this->_values[$name];
+            }
 
-		/* пре исключения для таблиц */
-		if (method_exists($this, '_' . $table . '_prefix')) {
-			$merthod = '_' . $table . '_prefix';
-			$this -> {$merthod}(&$value);
-		}
+            return $this->_values[$name] = $value;
+        }
+    }
 
-		$cache = $this -> get_cache_getID($table, $value);
-		if (!empty($cache)) {
-			return $cache;
-		}
+    /**
+     * Универсальный метод получения ИД из id=>val таблиц
+     */
+    private function _getID($table, $collum, $idcollum, $value, $strlen = 0)
+    {
+        if(strlen($value) > $strlen)
+        {
+            return FALSE;
+        }
 
-		$sql = 'SELECT `' . $idcollum . '` AS id FROM `' . $table . '` WHERE  `' . $collum . '` = \'' . $this -> db -> slash($value) . '\' LIMIT 1';
-		$row = $this -> db -> qRow($sql);
-		if (!empty($row)) {
+        $value_orig = $value;
+        if($strlen > 0)
+        {
+            $value = substr($value, 0, $strlen);
 
-		} else {
-			$sql = 'INSERT INTO `' . $table . '` (`' . $collum . '`) VALUES ("' . $this -> db -> slash($value) . '")';
-			$row = $this -> db -> q($sql);
-			$row = array('id' => $row);
-		}
+        }
 
-		$this -> set_cache_getID($table, $value, $row);
+        /* пре исключения для таблиц */
+        if(method_exists($this, '_' . $table . '_prefix'))
+        {
+            $merthod = '_' . $table . '_prefix';
+            $this->{$merthod}(&$value);
+        }
 
-		/* исключения для таблиц */
-		if (method_exists($this, '_' . $table . '_fix')) {
-			$merthod = '_' . $table . '_fix';
-			$this -> {$merthod}($value_orig, $row);
-		}
+        $cache = $this->get_cache_getID($table, $value);
+        if(!empty($cache))
+        {
+            return $cache;
+        }
 
-		return $row;
-	}
+        $sql = 'SELECT `' . $idcollum . '` AS id FROM `' . $table . '` WHERE  `' . $collum . '` = \'' . $this->db->slash($value) . '\' LIMIT 1';
+        $row = $this->db->qRow($sql);
+        if(!empty($row))
+        {
 
+        }
+        else
+        {
+            $sql = 'INSERT INTO `' . $table . '` (`' . $collum . '`) VALUES ("' . $this->db->slash($value) . '")';
+            $row = $this->db->q($sql);
+            $row = array('id' => $row);
+        }
+
+        $this->set_cache_getID($table, $value, $row);
+
+        /* исключения для таблиц */
+        if(method_exists($this, '_' . $table . '_fix'))
+        {
+            $merthod = '_' . $table . '_fix';
+            $this->{$merthod}($value_orig, $row);
+        }
+
+        return $row;
+    }
 
 
 }
