@@ -29,7 +29,7 @@ class cli
             $class = new $class_name;
             if($class instanceof Command)
             {
-
+//TODO: добавить форк 
 
                 $class->execute();
 
